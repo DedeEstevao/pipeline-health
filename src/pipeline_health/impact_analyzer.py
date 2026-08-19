@@ -1,4 +1,8 @@
-from pipeline_health.models import ImpactAnalysisResult, TaskImpact
+from pipeline_health.models import (
+    ImpactAnalysisResult,
+    TaskImpact,
+    TaskDiagnosis,
+)
 
 
 def analyze_impact(dag_run):
@@ -71,7 +75,6 @@ def analyze_impact(dag_run):
                             trigger_rule=task.trigger_rule,
                         )
                     )
-
             elif ti.state == "success":
 
                 result.impacted_tasks.append(
@@ -83,6 +86,19 @@ def analyze_impact(dag_run):
                         trigger_rule=task.trigger_rule,
                     )
                 )
+
+                if task.trigger_rule == "all_done":
+                    result.diagnoses.append(
+                        TaskDiagnosis(
+                            task_id=task.task_id,
+                            message=(
+                                f"Task '{task.task_id}' executed despite "
+                                "upstream failure because "
+                                "trigger_rule='all_done'."
+                            ),
+                            severity="warning",
+                        )
+                    )
 
     return result
 

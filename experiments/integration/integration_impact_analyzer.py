@@ -21,14 +21,23 @@ def run_impact_analysis(**context):
 
     for impact in result.impacted_tasks:
         print(
-          f"{impact.task_id} | "
-          f"state={impact.state} | "
-          f"type={impact.impact_type} | "
-          f"cause={impact.cause} | "
-          f"trigger_rule={impact.trigger_rule}"
+            f"{impact.task_id} | "
+            f"state={impact.state} | "
+            f"type={impact.impact_type} | "
+            f"cause={impact.cause} | "
+            f"trigger_rule={impact.trigger_rule}"
         )
+
     print("============================================")
 
+    print("\n--- DIAGNOSES ---")
+
+    for diagnosis in result.diagnoses:
+        print(
+            f"{diagnosis.task_id} | "
+            f"severity={diagnosis.severity} | "
+            f"{diagnosis.message}"
+        )
 
 with DAG(
     dag_id="integration_impact_analyzer",
