@@ -17,14 +17,16 @@ def run_impact_analysis(**context):
     result = analyze_impact(dag_run)
 
     print("\n========== PIPELINE HEALTH RESULT ==========")
-
     print(f"Root failures: {result.root_failures}")
-    print(f"Direct impact: {result.direct_impact}")
-    print(f"Propagated impact: {result.propagated_impact}")
-    print(
-        f"Executed despite failure: "
-        f"{result.executed_despite_failure}"
-    )
+
+    for impact in result.impacted_tasks:
+        print(
+          f"{impact.task_id} | "
+          f"state={impact.state} | "
+          f"type={impact.impact_type} | "
+          f"cause={impact.cause} | "
+          f"trigger_rule={impact.trigger_rule}"
+        )
     print("============================================")
 
 

@@ -1,4 +1,5 @@
-from pipeline_health.models import ImpactAnalysisResult
+from pipeline_health.models import ImpactAnalysisResult, TaskImpact
+
 
 def analyze_impact(dag_run):
     """
@@ -20,7 +21,6 @@ def analyze_impact(dag_run):
 
     result = ImpactAnalysisResult()
 
-
     for failed_ti in failed_tasks:
 
         failed_task = dag_run.dag.get_task(
@@ -30,6 +30,7 @@ def analyze_impact(dag_run):
         result.root_failures.append(
             failed_task.task_id
         )
+
         downstream_tasks = (
             failed_task.get_flat_relatives(
                 upstream=False
@@ -47,24 +48,41 @@ def analyze_impact(dag_run):
 
             if ti.state == "upstream_failed":
 
-                if (
-                    failed_task.task_id
-                    in task.upstream_task_ids
-                ):
+                if failed_task.task_id in task.upstream_task_ids:
 
-                    result.direct_impact.append(
-                        task.task_id
+                    result.impacted_tasks.append(
+                        TaskImpact(
+                            task_id=task.task_id,
+                            state=ti.state,
+                            impact_type="direct",
+                            cause=failed_task.task_id,
+                            trigger_rule=task.trigger_rule,
+                        )
                     )
 
                 else:
 
-                    result.propagated_impact.append(
-                       task.task_id
+                    result.impacted_tasks.append(
+                        TaskImpact(
+                            task_id=task.task_id,
+                            state=ti.state,
+                            impact_type="propagated",
+                            cause=failed_task.task_id,
+                            trigger_rule=task.trigger_rule,
+                        )
                     )
 
             elif ti.state == "success":
 
-                result.executed_despite_failure.append(task.task_id)
+                result.impacted_tasks.append(
+                    TaskImpact(
+                        task_id=task.task_id,
+                        state=ti.state,
+                        impact_type="executed_despite_failure",
+                        cause=failed_task.task_id,
+                        trigger_rule=task.trigger_rule,
+                    )
+                )
 
     return result
 
