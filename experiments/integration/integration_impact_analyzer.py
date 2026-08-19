@@ -18,14 +18,13 @@ def run_impact_analysis(**context):
 
     print("\n========== PIPELINE HEALTH RESULT ==========")
 
-    print(f"Root failures: {result['root_failures']}")
-    print(f"Direct impact: {result['direct_impact']}")
-    print(f"Propagated impact: {result['propagated_impact']}")
+    print(f"Root failures: {result.root_failures}")
+    print(f"Direct impact: {result.direct_impact}")
+    print(f"Propagated impact: {result.propagated_impact}")
     print(
-        "Executed despite failure: "
-        f"{result['executed_despite_failure']}"
+        f"Executed despite failure: "
+        f"{result.executed_despite_failure}"
     )
-
     print("============================================")
 
 

@@ -1,3 +1,5 @@
+from pipeline_health.models import ImpactAnalysisResult
+
 def analyze_impact(dag_run):
     """
     Analisa o impacto de falhas em uma execução de DAG.
@@ -16,12 +18,8 @@ def analyze_impact(dag_run):
         if ti.state == "failed"
     ]
 
-    result = {
-        "root_failures": [],
-        "direct_impact": [],
-        "propagated_impact": [],
-        "executed_despite_failure": [],
-    }
+    result = ImpactAnalysisResult()
+
 
     for failed_ti in failed_tasks:
 
@@ -29,10 +27,9 @@ def analyze_impact(dag_run):
             failed_ti.task_id
         )
 
-        result["root_failures"].append(
+        result.root_failures.append(
             failed_task.task_id
         )
-
         downstream_tasks = (
             failed_task.get_flat_relatives(
                 upstream=False
@@ -54,20 +51,20 @@ def analyze_impact(dag_run):
                     failed_task.task_id
                     in task.upstream_task_ids
                 ):
-                    result["direct_impact"].append(
+
+                    result.direct_impact.append(
                         task.task_id
                     )
 
                 else:
-                    result["propagated_impact"].append(
-                        task.task_id
+
+                    result.propagated_impact.append(
+                       task.task_id
                     )
 
             elif ti.state == "success":
 
-                result[
-                    "executed_despite_failure"
-                ].append(task.task_id)
+                result.executed_despite_failure.append(task.task_id)
 
     return result
 
